@@ -30,26 +30,15 @@ def promptForPalette():
     app.logger.info(f"Generated colors: {colors}")
     
     # Returning colors as a plain string
-    return f"Generated color palette: {', '.join(colors)}"
+    return {"colors": colors}
 
    
 
 @app.route("/")
 def index():
     try:
-        # Send request to OpenAI API
-        response = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Define rag?"}
-            ]
-        )
-    
-        # Access the content correctly
-        message_content = response.choices[0].message.content
         
-        return message_content
+        return render_template("index.html")
     
     except Exception as e:
         print(f"Error: {e}")

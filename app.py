@@ -7,7 +7,7 @@ from dotenv import dotenv_values
 dot_env = dotenv_values(".env")
 openai.api_key = dot_env["OPENAI_API_KEY"]
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='')
 
 def getPalette(msg):
     response = openai.chat.completions.create(

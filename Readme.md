@@ -27,8 +27,11 @@ ColorPalette is a simple and intuitive application designed to help users create
 
 - pip install livereload
 - from livereload import Server
-- if **name** == "**main**":
+- add the files that you want to watch
+  if **name** == "**main**":
   server = Server(app.wsgi*app) # Create a livereload server
   server.watch('templates/*.html') # Watch HTML changes
   server.watch('static/\*.css') # Watch CSS changes
   server.serve(port=5000, debug=True)
+
+- python app.py

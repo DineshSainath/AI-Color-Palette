@@ -19,6 +19,13 @@ function submitForm() {
     .catch((error) => console.error("Error generating palette:", error));
 }
 
+document.getElementById("query").addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevent form submission if inside a form element
+    submitForm();
+  }
+});
+
 function createColorBoxes(colors, container) {
   container.innerHTML = ""; // Clear existing palette
 

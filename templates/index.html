@@ -20,9 +20,9 @@
   <body>
     <!-- Header -->
     <header class="app-header">
-      <h1 class="app-title">AI Color Palette Generator</h1>
+      <h1 class="app-title">Palette AI</h1>
       <p>
-        Generate beautiful color palettes effortlessly with our AI-powered tool.
+        Generate beautiful color palettes effortlessly with my AI-powered tool.
       </p>
     </header>
 
@@ -31,11 +31,13 @@
       <!-- Form for user input -->
       <div class="input-box-container">
         <input
-          type="text"
+          type="search"
           id="query"
           placeholder="Enter a prompt to generate color palette"
         />
-        <button onclick="submitForm()">Generate Palette</button>
+        <!-- <input type="s" value="Reset" /> -->
+        <!-- <button onClick="clearInput()">X</button> -->
+        <button onclick="submitForm()">Generate</button>
       </div>
 
       <!-- Palette container -->
@@ -45,6 +47,7 @@
     </main>
 
     <!-- Footer -->
+    <footer>Made by DS</footer>
 
     <script src="app.js"></script>
   </body>

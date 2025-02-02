@@ -1,4 +1,5 @@
 import openai
+import os
 import json
 from flask import Flask, render_template, request
 from dotenv import dotenv_values
@@ -6,7 +7,8 @@ from livereload import Server  # 🔥 Import livereload package
 
 # Load API key from .env file
 dot_env = dotenv_values(".env")
-openai.api_key = dot_env["OPENAI_API_KEY"]
+# openai.api_key = dot_env["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='')
 

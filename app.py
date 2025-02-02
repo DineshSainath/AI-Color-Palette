@@ -41,7 +41,7 @@ def index():
         return "There was an error with the OpenAI API request."
 
 if __name__ == "__main__":
-    server = Server(app.wsgi_app)  # 🔥 Create a livereload server
-    server.watch('templates/*.html')  # 🔥 Watch HTML changes
-    server.watch('static/*.css')  # 🔥 Watch CSS changes
-    server.serve(port=5000, debug=True)  # 🔥 Start live reload server
+    server = Server(app.wsgi_app)  # Create a livereload server
+    server.watch('templates/*.html')  #  Watch HTML changes
+    server.watch('static/*.css')  #  Watch CSS changes
+    server.serve(port=5000, debug=True)  

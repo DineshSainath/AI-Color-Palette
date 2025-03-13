@@ -1,6 +1,17 @@
 // Handle form submission
 function submitForm() {
   const query = document.getElementById("query").value;
+  if (!query.trim()) {
+    showToast("Please enter a prompt first");
+    return;
+  }
+
+  // Show loading state
+  const button = document.querySelector("button");
+  const originalText = button.textContent;
+  button.textContent = "Generating...";
+  button.disabled = true;
+
   fetch("/palette", {
     method: "POST",
     headers: {
@@ -16,7 +27,15 @@ function submitForm() {
       const container = document.getElementById("paletteContainer");
       createColorBoxes(colors, container);
     })
-    .catch((error) => console.error("Error generating palette:", error));
+    .catch((error) => {
+      console.error("Error generating palette:", error);
+      showToast("Error generating palette. Please try again.");
+    })
+    .finally(() => {
+      // Reset button state
+      button.textContent = originalText;
+      button.disabled = false;
+    });
 }
 
 document.getElementById("query").addEventListener("keypress", function (event) {
@@ -42,11 +61,51 @@ function createColorBoxes(colors, container) {
 
     // Clipboard copy functionality
     div.addEventListener("click", function () {
-      navigator.clipboard.writeText(color).then(() => {
-        alert(`Color ${color} copied to clipboard!`);
-      });
+      navigator.clipboard
+        .writeText(color)
+        .then(() => {
+          showToast(`Color ${color} copied to clipboard!`);
+        })
+        .catch((err) => {
+          showToast("Failed to copy color");
+          console.error("Copy failed:", err);
+        });
     });
 
     container.appendChild(div);
   });
+}
+
+// Toast notification function
+function showToast(message) {
+  // Check if a toast container already exists
+  let toastContainer = document.querySelector(".toast-container");
+
+  // If not, create one
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.className = "toast-container";
+    document.body.appendChild(toastContainer);
+  }
+
+  // Create the toast element
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+
+  // Add it to the container
+  toastContainer.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
 }

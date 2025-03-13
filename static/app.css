@@ -8,85 +8,91 @@ body {
   background-color: white; /* Soft light blue for inviting feel */
   color: #333;
   font-size: 16px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 .app-header {
   background-color: white; /* Warm blue */
   color: black;
-  padding: 20px 0;
+  padding: 15px 20px;
   text-align: center;
-  height: 6rem;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 header h1 {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 800;
-  margin-left: 2rem;
+  margin-left: 1rem;
   color: #4e3b31;
 }
 header p {
-  margin-right: 2rem;
-  margin-top: 1rem;
+  margin-right: 1rem;
+  margin-top: 0;
+  font-size: 14px;
 }
 main {
-  /* padding: 50px 20px; */
-  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 20px;
 }
 .container {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 60px;
-  height: 100%;
+  gap: 15px;
+  margin-top: 50px;
+  width: 100%;
+  max-width: 1200px;
 }
 .color-box {
-  width: 250px;
-  height: 250px;
-  margin-top: 5rem;
+  width: 180px;
+  height: 180px;
+  margin: 5px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   cursor: pointer;
 }
 .color-box:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
-.hex-code {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-}
-.input-box-container {
-  /* position: relative; */
-  background-color: white;
-  /* border: 1px solid #d4c6b0; */
-  height: 4.5rem;
-  margin-top: 6.5em;
-  display: flex;
-  justify-content: center;
-}
-
 .hex-code {
   position: absolute;
   bottom: 15px;
   left: 15px;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
-
+.input-box-container {
+  background-color: white;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 10px;
+}
 #query {
-  padding: 12px 18px;
-  font-size: 18px;
+  padding: 10px 15px;
+  font-size: 16px;
   border-radius: 8px;
   border: none;
   width: 100%;
-  max-width: 25em;
-  height: 100%;
+  max-width: 400px;
+  height: 45px;
   outline: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
@@ -98,26 +104,23 @@ main {
 button {
   background-color: #7b5b3a; /* Matching button with header */
   color: #fff;
-  font-size: 18px;
-  padding: 20px 18px;
+  font-size: 16px;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  margin-left: 1rem;
-  /* margin-top: 20px; */
-  /* height: 100%; */
+  height: 45px;
   transition: background-color 0.3s ease;
 }
 button:hover {
   background-color: #4e3b31;
 }
 footer {
-  position: absolute;
-  top: 55rem;
-  left: 56.5rem;
-  padding: 20px;
-  /* background-color: #007acc; */
+  text-align: center;
+  padding: 15px;
   color: #4e3b31;
+  margin-top: 20px;
+  width: 100%;
 }
 /* close icon - black*/
 [type="search"]::-webkit-search-cancel-button {
@@ -129,31 +132,41 @@ footer {
   background-size: 10px 10px;
 }
 
-/* Media queries */
-/* Base styles remain the same */
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
+.toast {
+  background-color: #4e3b31;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  font-size: 14px;
+  max-width: 300px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Media queries */
 /* Large Screens (Laptops & Desktops) */
 @media screen and (max-width: 1200px) {
-  .container {
-    padding: 0 20px;
-  }
-
   .color-box {
-    width: 200px;
-    height: 200px;
-  }
-
-  footer {
-    position: relative;
-    top: auto;
-    left: auto;
-    text-align: center;
-    margin-top: 4rem;
-  }
-  footer {
-    position: absolute;
-    top: 50rem;
-    width: 100%;
+    width: 160px;
+    height: 160px;
   }
 }
 
@@ -162,42 +175,18 @@ footer {
   .app-header {
     flex-direction: column;
     height: auto;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
   }
 
   header h1 {
     margin-left: 0;
-    font-size: 32px;
+    font-size: 28px;
   }
 
   header p {
     margin-right: 0;
-    margin-top: 1rem;
-  }
-
-  .input-box-container {
-    margin-top: 3em;
-    padding: 0 20px;
-  }
-
-  .color-box {
-    width: 180px;
-    height: 180px;
-    margin-top: 3rem;
-  }
-
-  footer {
-    position: absolute;
-    top: 50rem;
-    width: 100%;
-  }
-}
-
-/* Small Screens (Tablets) */
-@media screen and (max-width: 768px) {
-  .container {
-    margin-top: 30px;
+    margin-top: 0.5rem;
   }
 
   .color-box {
@@ -205,46 +194,59 @@ footer {
     height: 150px;
   }
 
+  .container {
+    margin-top: 40px;
+  }
+}
+
+/* Small Screens (Tablets) */
+@media screen and (max-width: 768px) {
+  .container {
+    margin-top: 35px;
+  }
+
+  .color-box {
+    width: 130px;
+    height: 130px;
+  }
+
   .input-box-container {
     flex-direction: column;
     height: auto;
-    gap: 1rem;
-    padding: 0 20px;
   }
 
   #query {
-    height: 3.5rem;
     max-width: 100%;
   }
 
   button {
-    margin-left: 0;
-    padding: 15px;
+    width: 100%;
   }
 }
 
 /* Extra Small Screens (Mobile Phones) */
 @media screen and (max-width: 576px) {
   .app-header {
-    padding: 15px;
+    padding: 10px;
   }
 
   header h1 {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   header p {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .container {
-    margin-top: 20px;
+    margin-top: 30px;
+    gap: 10px;
   }
 
   .color-box {
-    width: 130px;
-    height: 130px;
-    margin-top: 2rem;
+    width: 110px;
+    height: 110px;
+    margin: 3px;
   }
 
   .hex-code {
@@ -252,26 +254,17 @@ footer {
     bottom: 10px;
     left: 10px;
   }
-
-  #query {
-    font-size: 16px;
-    padding: 10px 15px;
-  }
-
-  button {
-    font-size: 16px;
-  }
 }
 
-/* Extra Extra Small Screens */
+/* Very Small Screens */
 @media screen and (max-width: 380px) {
   .color-box {
     width: 100%;
-    height: 120px;
-    margin: 1rem 10px;
+    height: 100px;
+    margin: 5px 0;
   }
 
   .container {
-    flex-direction: column;
+    gap: 8px;
   }
 }

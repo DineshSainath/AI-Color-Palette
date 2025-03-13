@@ -20,3 +20,4 @@ __pycache__/
 # Ignore operating system-specific files
 .DS_Store  # macOS
 Thumbs.db  # Windows
+.vercel

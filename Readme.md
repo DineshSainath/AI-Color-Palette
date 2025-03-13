@@ -15,23 +15,51 @@ ColorPalette is a simple and intuitive application designed to help users create
 1. Open the application in your browser.
 2. Use the color picker to select colors and add them to your palette.
 
-## Notes
+## Local Development
 
 1. Establish virtual python environment
 
-- source env/Scripts/activate
+   - `source env/Scripts/activate` (Windows)
+   - `source env/bin/activate` (Mac/Linux)
 
-2. To run with flask use: flask run
+2. To run with flask use: `flask run`
 
 3. To run the server with live changes:
+   - `python app.py`
 
-- pip install livereload
-- from livereload import Server
-- add the files that you want to watch
-  if **name** == "**main**":
-  server = Server(app.wsgi*app) # Create a livereload server
-  server.watch('templates/*.html') # Watch HTML changes
-  server.watch('static/\*.css') # Watch CSS changes
-  server.serve(port=5000, debug=True)
+## Deployment on Vercel
 
-- python app.py
+This application is configured for deployment on Vercel. To deploy:
+
+1. Install Vercel CLI:
+
+   ```
+   npm install -g vercel
+   ```
+
+2. Login to Vercel:
+
+   ```
+   vercel login
+   ```
+
+3. Deploy the application:
+
+   ```
+   vercel
+   ```
+
+4. Set up environment variables in the Vercel dashboard:
+
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `SECRET_KEY`: A secure random string for Flask sessions
+   - `DATABASE_URL`: URL for your database (if using a cloud database)
+
+5. For production deployment:
+   ```
+   vercel --prod
+   ```
+
+## Database Configuration
+
+For local development, the application uses SQLite. For production on Vercel, you should use a cloud database like PostgreSQL.

@@ -85,15 +85,23 @@ def login():
         return redirect(url_for('index'))
     
     form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user)
-            flash('Logged in successfully!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
-        else:
-            flash('Invalid email or password', 'danger')
+    try:
+        if form.validate_on_submit():
+            try:
+                user = User.query.filter_by(email=form.email.data).first()
+                if user and user.check_password(form.password.data):
+                    login_user(user)
+                    flash('Logged in successfully!', 'success')
+                    next_page = request.args.get('next')
+                    return redirect(next_page) if next_page else redirect(url_for('index'))
+                else:
+                    flash('Invalid email or password', 'danger')
+            except Exception as e:
+                app.logger.error(f"Database error during login: {str(e)}")
+                flash('An error occurred while trying to log in. Please try again later.', 'danger')
+    except Exception as e:
+        app.logger.error(f"Form validation error: {str(e)}")
+        flash('An error occurred while processing your request. Please try again later.', 'danger')
     
     return render_template('login.html', form=form)
 
@@ -158,16 +166,63 @@ def delete_palette(palette_id):
     flash('Palette deleted successfully', 'success')
     return redirect(url_for('my_palettes'))
 
+@app.route("/debug")
+def debug():
+    """Debug route to check database connection and configuration."""
+    try:
+        # Check database connection
+        with db.engine.connect() as conn:
+            result = conn.execute("SELECT 1").fetchone()
+            db_connected = result is not None
+        
+        # Get environment info
+        env_info = {
+            "VERCEL_ENV": os.environ.get("VERCEL_ENV", "Not set"),
+            "DATABASE_URL": os.environ.get("DATABASE_URL", "Not set")[:20] + "..." if os.environ.get("DATABASE_URL") else "Not set",
+            "FLASK_ENV": os.environ.get("FLASK_ENV", "Not set"),
+            "DB Connected": db_connected,
+            "SQLAlchemy Version": db.engine.dialect.driver,
+        }
+        
+        return jsonify({
+            "status": "ok",
+            "environment": env_info,
+            "tables": [table for table in db.metadata.tables.keys()]
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "type": str(type(e))
+        }), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle all unhandled exceptions."""
+    app.logger.error(f"Unhandled exception: {str(e)}")
+    return render_template('error.html', error=str(e)), 500
+
 @app.context_processor
 def inject_user_logged_in():
     return dict(user_logged_in=current_user.is_authenticated)
 
 # Create database tables
-with app.app_context():
-    db.create_all()
+# Only create tables when running locally, not on Vercel
+if not os.environ.get('VERCEL_ENV'):
+    with app.app_context():
+        db.create_all()
+else:
+    # For Vercel, we'll just ensure the app context is set up properly
+    # Tables should be created using the setup_db.py script
+    with app.app_context():
+        pass  # Just initialize the app context
 
 if __name__ == "__main__":
-    server = Server(app.wsgi_app)  # Create a livereload server
-    server.watch('templates/*.html')  #  Watch HTML changes
-    server.watch('static/*.css')  #  Watch CSS changes
-    server.serve(port=5000, debug=True)  
+    # Only run the development server when running locally
+    if not os.environ.get('VERCEL_ENV'):
+        server = Server(app.wsgi_app)  # Create a livereload server
+        server.watch('templates/*.html')  #  Watch HTML changes
+        server.watch('static/*.css')  #  Watch CSS changes
+        server.serve(port=5000, debug=True)
+    else:
+        app.run()  

@@ -1,9 +1,13 @@
 import openai
 import os
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import dotenv_values
-from livereload import Server  # 🔥 Import livereload package
+from livereload import Server
+from models import db, User, Palette
+from forms import RegistrationForm, LoginForm, PaletteForm
 
 # Load API key from .env file
 dot_env = dotenv_values(".env")
@@ -11,6 +15,23 @@ dot_env = dotenv_values(".env")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='')
+
+# Configure app
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key_for_development_only')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///palette.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
+db.init_app(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Please log in to access this page'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
 
 def getPalette(msg):
     response = openai.chat.completions.create(
@@ -41,6 +62,109 @@ def index():
     except Exception as e:
         print(f"Error: {e}")
         return "There was an error with the OpenAI API request."
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Account created successfully! You can now log in.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html', form=form)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Logged in successfully!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
+        else:
+            flash('Invalid email or password', 'danger')
+    
+    return render_template('login.html', form=form)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash('Logged out successfully!', 'success')
+    return redirect(url_for('index'))
+
+@app.route("/save_palette", methods=['POST'])
+@login_required
+def save_palette():
+    name = request.form.get('name')
+    colors_json = request.form.get('colors')
+    
+    if not name or not colors_json:
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    palette = Palette(name=name, colors=colors_json, user_id=current_user.id)
+    db.session.add(palette)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Palette saved successfully'})
+
+@app.route("/my_palettes")
+@login_required
+def my_palettes():
+    palettes = Palette.query.filter_by(user_id=current_user.id).order_by(Palette.created_at.desc()).all()
+    
+    # Add colors_list attribute to each palette
+    for palette in palettes:
+        palette.colors_list = json.loads(palette.colors)
+    
+    return render_template('my_palettes.html', palettes=palettes)
+
+@app.route("/palette/<int:palette_id>")
+@login_required
+def view_palette(palette_id):
+    palette = Palette.query.get_or_404(palette_id)
+    
+    # Check if the palette belongs to the current user
+    if palette.user_id != current_user.id:
+        flash('You do not have permission to view this palette', 'danger')
+        return redirect(url_for('my_palettes'))
+    
+    palette.colors_list = json.loads(palette.colors)
+    return render_template('view_palette.html', palette=palette)
+
+@app.route("/delete_palette/<int:palette_id>", methods=['POST'])
+@login_required
+def delete_palette(palette_id):
+    palette = Palette.query.get_or_404(palette_id)
+    
+    # Check if the palette belongs to the current user
+    if palette.user_id != current_user.id:
+        flash('You do not have permission to delete this palette', 'danger')
+        return redirect(url_for('my_palettes'))
+    
+    db.session.delete(palette)
+    db.session.commit()
+    flash('Palette deleted successfully', 'success')
+    return redirect(url_for('my_palettes'))
+
+@app.context_processor
+def inject_user_logged_in():
+    return dict(user_logged_in=current_user.is_authenticated)
+
+# Create database tables
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     server = Server(app.wsgi_app)  # Create a livereload server

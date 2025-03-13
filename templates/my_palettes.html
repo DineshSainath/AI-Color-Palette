@@ -1,0 +1,53 @@
+{% extends "layout.html" %} {% block content %}
+<div class="my-palettes-container">
+  <h2>My Saved Palettes</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div class="flash-message {{ category }}">{{ message }}</div>
+  {% endfor %} {% endif %} {% endwith %} {% if palettes %}
+  <div class="palettes-grid">
+    {% for palette in palettes %}
+    <div class="palette-card">
+      <h3>{{ palette.name }}</h3>
+      <div class="palette-preview">
+        {% for color in palette.colors_list %}
+        <div class="color-preview" style="background-color: {{ color }}">
+          <span class="preview-hex">{{ color }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="palette-actions">
+        <a
+          href="{{ url_for('view_palette', palette_id=palette.id) }}"
+          class="btn btn-small"
+          >View</a
+        >
+        <form
+          action="{{ url_for('delete_palette', palette_id=palette.id) }}"
+          method="POST"
+          class="inline-form"
+        >
+          <button
+            type="submit"
+            class="btn btn-small btn-danger"
+            onclick="return confirm('Are you sure you want to delete this palette?')"
+          >
+            Delete
+          </button>
+        </form>
+      </div>
+      <p class="palette-date">
+        Created: {{ palette.created_at.strftime('%Y-%m-%d') }}
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-palettes">
+    <p>You haven't saved any palettes yet.</p>
+    <a href="{{ url_for('index') }}" class="btn">Generate a Palette</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

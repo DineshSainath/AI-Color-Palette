@@ -1,0 +1,39 @@
+{% extends "layout.html" %} {% block content %}
+<div class="view-palette-container">
+  <h2>{{ palette.name }}</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div class="flash-message {{ category }}">{{ message }}</div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <div class="palette-display">
+    {% for color in palette.colors_list %}
+    <div class="color-box" style="background-color: {{ color }}">
+      <span class="hex-code">{{ color }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="palette-info">
+    <p>Created: {{ palette.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+  </div>
+
+  <div class="palette-actions">
+    <a href="{{ url_for('my_palettes') }}" class="btn">Back to My Palettes</a>
+    <form
+      action="{{ url_for('delete_palette', palette_id=palette.id) }}"
+      method="POST"
+      class="inline-form"
+    >
+      <button
+        type="submit"
+        class="btn btn-danger"
+        onclick="return confirm('Are you sure you want to delete this palette?')"
+      >
+        Delete
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

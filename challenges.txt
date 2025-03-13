@@ -1,0 +1,75 @@
+# PALETTE AI APPLICATION: CHALLENGES & SOLUTIONS
+
+## DATABASE CONNECTION ISSUES
+
+### Challenge 1: IPv6 Connection Failure on Vercel
+**Error:** "Cannot assign requested address" when connecting to Supabase from Vercel
+**Cause:** Vercel doesn't support IPv6, but Supabase's direct connection uses IPv6 by default
+**Solution:** 
+- Used Supabase's Session pooler connection string (with pooler.supabase.com) instead of direct connection
+- Updated connection string in Vercel environment variables
+- Modified SQLAlchemy engine options to optimize for Supavisor connections
+
+### Challenge 2: Connection Pooling Configuration
+**Error:** Database connection timeouts in serverless environment
+**Cause:** Default connection pooling settings not optimized for serverless
+**Solution:**
+- Set minimal pool size (pool_size=1) for Supavisor connections
+- Disabled overflow connections (max_overflow=0)
+- Added connection timeout and keepalive settings
+- Added pre-ping option to verify connections before use
+
+## DATA MODEL ISSUES
+
+### Challenge 3: Password Hash Length Limitation
+**Error:** "StringDataRightTruncation: value too long for type character varying(128)"
+**Cause:** Password hash column too small for scrypt algorithm output
+**Solution:**
+- Increased password_hash column size from 128 to 256 characters in User model
+- Created and ran SQL migration to alter the database table structure
+
+## DEPLOYMENT ISSUES
+
+### Challenge 4: PostgreSQL Connection String Format
+**Error:** SQLAlchemy connection errors with postgres:// prefix
+**Cause:** SQLAlchemy requires postgresql:// prefix instead of postgres://
+**Solution:**
+- Added code to automatically replace postgres:// with postgresql:// in connection strings
+- Added logging to track connection details for debugging
+
+### Challenge 5: Error Handling in Serverless Environment
+**Error:** Unhandled exceptions causing 500 errors
+**Solution:**
+- Added global error handler to catch and log all exceptions
+- Implemented specific error routes for database connection issues
+- Added health check endpoint that doesn't require database access
+- Enhanced logging throughout the application
+
+## SECURITY CONCERNS
+
+### Challenge 6: API Key and Credential Exposure
+**Risk:** Sensitive information in .env file could be exposed
+**Solution:**
+- Ensured .env file is in .gitignore
+- Stored all sensitive information as environment variables in Vercel
+- Recommended rotating exposed API keys and passwords
+- Implemented environment variable validation
+
+## TESTING AND DEBUGGING
+
+### Challenge 7: Diagnosing Connection Issues
+**Challenge:** Difficult to identify exact cause of database connection failures
+**Solution:**
+- Created dedicated test endpoints:
+  - /health for basic application status
+  - /test_db_connection for direct database connection testing
+  - /test_sqlalchemy for ORM connection testing
+- Enhanced error reporting with detailed diagnostics
+
+## LESSONS LEARNED
+
+1. **Serverless Compatibility:** Always check infrastructure compatibility (IPv4/IPv6) when deploying to serverless platforms
+2. **Connection Pooling:** Optimize database connection settings for the specific deployment environment
+3. **Error Handling:** Implement comprehensive error handling and logging for easier debugging
+4. **Security:** Keep sensitive information in environment variables and rotate credentials if exposed
+5. **Testing:** Create dedicated diagnostic endpoints for troubleshooting production issues 
